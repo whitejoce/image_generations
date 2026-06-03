@@ -712,6 +712,17 @@
       log.scrollTop = log.scrollHeight;
     }
 
+    async function loadConfig() {
+      try {
+        const response = await fetch("/api/config");
+        const config = await response.json();
+        if (!response.ok) throw new Error(config.detail || response.statusText);
+        modelEl.value = config.image_model || modelEl.value;
+      } catch (error) {
+        addLog(`config load failed: ${error.message}`, "danger");
+      }
+    }
+
     function resetView() {
       currentDataUrl = "";
       currentFormat = formatEl.value || "png";
@@ -1098,6 +1109,7 @@
     updateImageCountState();
     renderPromptHistory();
     renderReferenceImages();
+    loadConfig();
   </script>
 </body>
 </html>
