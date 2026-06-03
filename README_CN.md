@@ -46,8 +46,10 @@ pip install openai python-dotenv fastapi uvicorn python-multipart
 在 `partial_image/.env` 中配置 API Key：
 
 ```env
-api-key=你的_API_KEY
-base-url=https://api.openai.com/v1
+OPENAI_BASE_URL= https://openai.com/v1
+OPENAI_API_KEY= your_api_key_here
+IMAGE_MODEL= gpt-image-2
+TEXT_MODEL= gpt-5.5
 ```
 
 说明：
