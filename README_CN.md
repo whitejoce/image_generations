@@ -4,7 +4,9 @@
 
 一个用于调试和演示 OpenAI 图像生成流式中间图的本地 Web 工具。项目支持普通文生图、带参考图的图像编辑、partial image 实时预览、提示词优化，以及将每次运行的输出图片和参数保存到本地。
 
-![Demo](images/demo.png)
+| 标准界面 | 蜡笔风格 |
+| :---: | :---: |
+| ![Demo](images/demo.png) | ![Crayon UI](images/crayon_style.png) |
 
 ## 功能特性
 
@@ -46,10 +48,10 @@ pip install openai python-dotenv fastapi uvicorn python-multipart
 在 `partial_image/.env` 中配置 API Key：
 
 ```env
-OPENAI_BASE_URL= https://openai.com/v1
-OPENAI_API_KEY= your_api_key_here
-IMAGE_MODEL= gpt-image-2
-TEXT_MODEL= gpt-5.5
+OPENAI_BASE_URL= https://openai.com/v1  # 必填
+OPENAI_API_KEY= sk-xxxxxxx  # 可选，自定义 API Base URL 时使用
+IMAGE_MODEL=gpt-image-2
+TEXT_MODEL=gpt-5.5
 ```
 
 说明：

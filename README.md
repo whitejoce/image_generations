@@ -7,7 +7,9 @@
 
 A local web tool for debugging and demonstrating streamed intermediate images from the OpenAI image generation API. The project supports text-to-image generation, image editing with reference images, real-time partial image previews, prompt optimization, and local saving of output images and run metadata.
 
-![Demo](images/demo.png)
+| Standard UI | Crayon Style |
+| :---: | :---: |
+| ![Demo](images/demo.png) | ![Crayon UI](images/crayon_style.png) |
 
 ## Features
 
@@ -57,9 +59,9 @@ Configure your API key in `partial_image/.env`:
 
 ```env
 OPENAI_BASE_URL= https://openai.com/v1
-OPENAI_API_KEY= your_api_key_here
-IMAGE_MODEL= gpt-image-2
-TEXT_MODEL= gpt-5.5
+OPENAI_API_KEY= YOUR_API_KEY
+IMAGE_MODEL=gpt-image-2
+TEXT_MODEL=gpt-5.5
 ```
 
 Notes:
@@ -68,8 +70,6 @@ Notes:
 - `OPENAI_BASE_URL`: optional custom API base URL
 - `IMAGE_MODEL`: editable in the web page, defaults to `gpt-image-2`
 - `TEXT_MODEL`: defaults to `gpt-5.5`, used for prompt optimization
-
-The backend also supports the legacy `.env` names `api-key` and `base-url`.
 
 ## Run The Web App
 
