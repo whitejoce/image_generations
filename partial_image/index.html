@@ -18,6 +18,49 @@
       --danger: #b42318;
       --ink: #111827;
       --shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
+      --input-bg: #ffffff;
+      --surface-2: #fbfcfe;
+      --surface-3: #fafafa;
+      --btn-bg: #eef2f7;
+      --btn-bg-hover: #e6ebf2;
+      --btn-border-hover: #bdc7d5;
+      --dashed: #b8c2cf;
+      --checker: #edf0f5;
+      --checker-base: #ffffff;
+      --thumb-bg: #eef2f7;
+      --overlay: rgba(15, 23, 42, 0.78);
+      --overlay-hover: rgba(15, 23, 42, 0.92);
+      --stage-overlay: rgba(255, 255, 255, 0.65);
+      --ok: #15803d;
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0b1120;
+      --panel: #131c2e;
+      --text: #e5ebf3;
+      --muted: #93a1b5;
+      --line: #283449;
+      --accent: #2dd4bf;
+      --accent-strong: #5eead4;
+      --warn: #f0b429;
+      --danger: #f87171;
+      --ink: #f1f5f9;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+      --input-bg: #0f1726;
+      --surface-2: #0f1726;
+      --surface-3: #0f1726;
+      --btn-bg: #1e293b;
+      --btn-bg-hover: #28344a;
+      --btn-border-hover: #3a4a63;
+      --dashed: #3a4a63;
+      --checker: #1b2536;
+      --checker-base: #0f1726;
+      --thumb-bg: #1e293b;
+      --overlay: rgba(2, 6, 23, 0.82);
+      --overlay-hover: rgba(2, 6, 23, 0.95);
+      --stage-overlay: rgba(19, 28, 46, 0.65);
+      --ok: #4ade80;
     }
 
     * {
@@ -35,6 +78,7 @@
       color: var(--text);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.45;
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
     [hidden] {
@@ -86,8 +130,8 @@
     .field-hint {
       margin-top: 5px;
       color: var(--muted);
-      font-size: 11px;
-      line-height: 1.3;
+      font-size: 12px;
+      line-height: 1.35;
     }
 
     .prompt-history {
@@ -103,7 +147,7 @@
       padding: 14px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #fbfcfe;
+      background: var(--surface-2);
     }
 
     .reference-header {
@@ -141,7 +185,7 @@
     .reference-empty {
       grid-column: 1 / -1;
       min-height: 74px;
-      border: 1px dashed #b8c2cf;
+      border: 1px dashed var(--dashed);
       border-radius: 8px;
       display: grid;
       place-items: center;
@@ -149,7 +193,7 @@
       font-size: 12px;
       text-align: center;
       padding: 10px;
-      background: #fff;
+      background: var(--input-bg);
     }
 
     .reference-card {
@@ -157,7 +201,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       overflow: hidden;
-      background: #fff;
+      background: var(--input-bg);
       aspect-ratio: 1 / 1;
     }
 
@@ -176,13 +220,13 @@
       min-height: 24px;
       padding: 0;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.78);
+      background: var(--overlay);
       color: #fff;
       line-height: 1;
     }
 
     .reference-remove:hover:not(:disabled) {
-      background: rgba(15, 23, 42, 0.92);
+      background: var(--overlay-hover);
       border-color: transparent;
     }
 
@@ -192,7 +236,7 @@
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 6px;
-      background: #fff;
+      background: var(--input-bg);
       color: var(--text);
       font: inherit;
       font-size: 14px;
@@ -233,23 +277,29 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-top: 18px;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      padding-top: 14px;
+      background: linear-gradient(to top, var(--panel) 78%, transparent);
     }
 
     button {
       border: 1px solid transparent;
       border-radius: 6px;
-      background: #eef2f7;
+      background: var(--btn-bg);
       color: var(--ink);
       font: inherit;
       font-weight: 650;
       min-height: 40px;
       padding: 9px 12px;
       cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
     }
 
     button:hover:not(:disabled) {
-      border-color: #bdc7d5;
-      background: #e6ebf2;
+      border-color: var(--btn-border-hover);
+      background: var(--btn-bg-hover);
     }
 
     button:disabled {
@@ -282,7 +332,7 @@
       padding: 10px;
       border: 1px solid var(--line);
       border-radius: 6px;
-      background: #fafafa;
+      background: var(--surface-3);
       color: var(--text);
       font-size: 13px;
       white-space: pre-wrap;
@@ -299,6 +349,7 @@
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
       overflow: hidden;
+      position: relative;
     }
 
     .preview-header {
@@ -315,6 +366,27 @@
       color: var(--muted);
       font-size: 13px;
       overflow-wrap: anywhere;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .status-dot.ok { background: var(--ok); }
+    .status-dot.streaming { background: #d88c00; animation: pulse-dot 1s ease-in-out infinite; }
+    .status-dot.error { background: var(--danger); }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
     }
 
     .image-stage {
@@ -324,34 +396,64 @@
       padding: 18px;
       overflow: hidden;
       background:
-        linear-gradient(45deg, #edf0f5 25%, transparent 25%),
-        linear-gradient(-45deg, #edf0f5 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #edf0f5 75%),
-        linear-gradient(-45deg, transparent 75%, #edf0f5 75%);
-      background-size: 26px 26px;
-      background-position: 0 0, 0 13px, 13px -13px, -13px 0;
+        linear-gradient(45deg, var(--checker) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--checker) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--checker) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--checker) 75%),
+        var(--checker-base);
+      background-size: 26px 26px, 26px 26px, 26px 26px, 26px 26px, auto;
+      background-position: 0 0, 0 13px, 13px -13px, -13px 0, 0 0;
     }
 
     .image-stage img {
+      display: block;
       max-width: 100%;
       max-height: min(52vh, 560px);
       object-fit: contain;
       border-radius: 4px;
       box-shadow: 0 16px 40px rgba(17, 24, 39, 0.22);
-      background: #fff;
     }
 
     .empty {
       width: min(520px, 100%);
       min-height: 220px;
-      border: 1px dashed #b8c2cf;
+      border: 1px dashed var(--dashed);
       border-radius: 8px;
       display: grid;
       place-items: center;
       color: var(--muted);
       text-align: center;
       padding: 20px;
-      background: rgba(255, 255, 255, 0.74);
+      background: var(--input-bg);
+      opacity: 0.9;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      z-index: 6;
+      inset: 56px 0 0 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: var(--stage-overlay);
+      backdrop-filter: blur(2px);
+    }
+
+    .loading-overlay.visible {
+      display: flex;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--line);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     .lower {
@@ -385,7 +487,7 @@
     .thumb {
       border: 1px solid var(--line);
       border-radius: 6px;
-      background: #fff;
+      background: var(--input-bg);
       overflow: hidden;
       padding: 0;
       text-align: left;
@@ -395,7 +497,7 @@
 
     .thumb:hover {
       border-color: var(--accent);
-      background: #fff;
+      background: var(--input-bg);
     }
 
     .thumb.active {
@@ -408,15 +510,22 @@
       width: 100%;
       aspect-ratio: 1 / 1;
       object-fit: cover;
-      background: #eef2f7;
+      background: var(--thumb-bg);
     }
 
-    .thumb span {
-      display: block;
-      padding: 7px 8px;
-      font-size: 12px;
+    .thumb-caption {
+      padding: 6px 8px;
+      font-size: 11px;
       color: var(--muted);
       overflow-wrap: anywhere;
+      line-height: 1.25;
+    }
+
+    .thumb-caption .thumb-title {
+      display: block;
+      font-weight: 650;
+      color: var(--ink);
+      font-size: 12px;
     }
 
     .log {
@@ -437,6 +546,32 @@
       color: var(--muted);
       font-size: 12px;
       margin-top: 6px;
+    }
+
+    .controls-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .theme-toggle {
+      width: 34px;
+      min-height: 34px;
+      padding: 0;
+      border-radius: 8px;
+      background: var(--btn-bg);
+      border: 1px solid var(--line);
+      font-size: 17px;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle:hover:not(:disabled) {
+      background: var(--btn-bg-hover);
+      border-color: var(--btn-border-hover);
     }
 
     .warn {
@@ -490,8 +625,13 @@
 <body>
   <main class="app">
     <aside class="controls">
-      <h1>partial_image debugger</h1>
-      <p class="subtitle">Image API generation stream visualizer</p>
+      <div class="controls-header">
+        <div>
+          <h1>partial_image debugger</h1>
+          <p class="subtitle">Image API generation stream visualizer</p>
+        </div>
+        <button class="theme-toggle" id="themeToggle" type="button" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">☀</button>
+      </div>
 
       <label for="prompt">Prompt</label>
       <textarea id="prompt">Draw a gorgeous image of a river made of white owl feathers, snaking its way through a serene winter landscape</textarea>
@@ -606,6 +746,12 @@
         </div>
       </div>
 
+      <section class="optimized">
+        <label>Optimized prompt</label>
+        <div id="optimizedOutput" class="optimized-output">No optimized prompt yet.</div>
+        <button id="applyOptimized" class="full" style="margin-top: 10px;" disabled>Apply optimized prompt</button>
+      </section>
+
       <div class="actions">
         <button id="generate" class="primary">Generate</button>
         <button id="replay">Replay local</button>
@@ -613,12 +759,6 @@
         <button id="clear">Clear</button>
         <button id="download" class="full" disabled>Download current image</button>
       </div>
-
-      <section class="optimized">
-        <label>Optimized prompt</label>
-        <div id="optimizedOutput" class="optimized-output">No optimized prompt yet.</div>
-        <button id="applyOptimized" class="full" style="margin-top: 10px;" disabled>Apply optimized prompt</button>
-      </section>
     </aside>
 
     <section class="workspace">
@@ -626,13 +766,14 @@
         <div class="preview-header">
           <div>
             <strong>Current preview</strong>
-            <div id="status" class="status">Idle</div>
+            <div id="status" class="status"><span class="status-dot" id="statusDot"></span> <span id="statusText">Idle</span></div>
           </div>
           <div id="elapsed" class="status">0 ms</div>
         </div>
         <div class="image-stage">
            <div id="empty" class="empty">Run generation or replay local images to inspect the stream.</div>
            <img id="currentImage" alt="Generated image preview" hidden>
+           <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
         </div>
       </section>
 
@@ -681,7 +822,11 @@
     const timeline = document.getElementById("timeline");
     const log = document.getElementById("log");
     const statusEl = document.getElementById("status");
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
     const elapsedEl = document.getElementById("elapsed");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const themeToggle = document.getElementById("themeToggle");
 
     let currentDataUrl = "";
     let currentFormat = "png";
@@ -691,6 +836,7 @@
     let referenceImages = [];
 
     const promptHistoryKey = "partialImagePromptHistory.v1";
+    const themeKey = "partialImageTheme.v1";
     const maxReferenceImages = 16;
     const maxReferenceBytes = 50 * 1024 * 1024;
     const allowedReferenceTypes = new Set(["image/png", "image/jpeg", "image/webp"]);
@@ -710,6 +856,12 @@
       if (className) line.className = className;
       log.appendChild(line);
       log.scrollTop = log.scrollHeight;
+    }
+
+    function setStatus(text, state) {
+      statusDot.className = "status-dot";
+      if (state) statusDot.classList.add(state);
+      statusText.textContent = text;
     }
 
     async function loadConfig() {
@@ -733,7 +885,7 @@
       empty.hidden = false;
       timeline.innerHTML = "";
       log.innerHTML = "";
-      statusEl.textContent = "Idle";
+      setStatus("Idle");
       elapsedEl.textContent = "0 ms";
       downloadBtn.disabled = true;
     }
@@ -827,7 +979,8 @@
         const remove = document.createElement("button");
         remove.type = "button";
         remove.className = "reference-remove";
-        remove.textContent = "x";
+        remove.textContent = "×";
+        remove.setAttribute("aria-label", `Remove ${image.file.name}`);
         remove.title = `Remove ${image.file.name}`;
         remove.addEventListener("click", () => removeReferenceImage(image.id));
         card.appendChild(img);
@@ -909,8 +1062,9 @@
       currentImage.src = currentDataUrl;
       currentImage.hidden = false;
       empty.hidden = true;
+      loadingOverlay.classList.remove("visible");
       downloadBtn.disabled = false;
-      statusEl.textContent = `${image.type} #${image.index}`;
+      setStatus(`${image.type} #${image.index}`, "ok");
       elapsedEl.textContent = `${image.elapsed_ms || 0} ms`;
       activeTimelineId = image.id;
       document.querySelectorAll(".thumb").forEach((thumb) => {
@@ -941,9 +1095,15 @@
       const img = document.createElement("img");
       img.src = image.dataUrl;
       img.alt = `${event.type} ${event.index}`;
-      const caption = document.createElement("span");
-      const kb = event.bytes ? `${Math.round(event.bytes / 1024)} KB` : "unknown size";
-      caption.textContent = `${event.type} #${event.index} - ${event.elapsed_ms || 0} ms - ${kb}`;
+      const caption = document.createElement("div");
+      caption.className = "thumb-caption";
+      const kb = event.bytes ? `${Math.round(event.bytes / 1024)}KB` : "?KB";
+      const title = document.createElement("span");
+      title.className = "thumb-title";
+      title.textContent = `${event.type} #${event.index}`;
+      const meta = document.createTextNode(`${event.elapsed_ms || 0}ms · ${kb}`);
+      caption.appendChild(title);
+      caption.appendChild(meta);
       thumb.appendChild(img);
       thumb.appendChild(caption);
       thumb.addEventListener("click", () => {
@@ -958,7 +1118,8 @@
 
     async function streamEndpoint(url, body) {
       setBusy(true);
-      statusEl.textContent = "Streaming";
+      setStatus("Streaming", "streaming");
+      loadingOverlay.classList.add("visible");
       try {
         const isForm = body instanceof FormData;
         const options = {
@@ -993,8 +1154,10 @@
         if (buffer.trim()) handleStreamEvent(JSON.parse(buffer));
       } catch (error) {
         addLog(error.message, "danger");
-        statusEl.textContent = "Error";
+        loadingOverlay.classList.remove("visible");
+        setStatus("Error", "error");
       } finally {
+        loadingOverlay.classList.remove("visible");
         setBusy(false);
       }
     }
@@ -1003,11 +1166,11 @@
       if (event.type === "partial_image" || event.type === "final_image") {
         showImage(event);
       } else if (event.type === "done") {
-        statusEl.textContent = "Done";
+        setStatus("Done", "ok");
         elapsedEl.textContent = `${event.elapsed_ms || 0} ms`;
         addLog(`done elapsed=${event.elapsed_ms || 0}ms run_dir=${event.run_dir || ""}`);
       } else if (event.type === "error") {
-        statusEl.textContent = "Error";
+        setStatus("Error", "error");
         addLog(event.message || "Unknown error", "danger");
       } else if (event.type === "log") {
         addLog(event.message || JSON.stringify(event));
@@ -1107,6 +1270,39 @@
     partialsEl.addEventListener("change", updateImageCountState);
     updateCompressionState();
     updateImageCountState();
+
+    function applyTheme(theme) {
+      if (theme === "dark") {
+        document.documentElement.setAttribute("data-theme", "dark");
+        themeToggle.textContent = "☾";
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+        themeToggle.textContent = "☀";
+      }
+    }
+
+    function initTheme() {
+      const stored = localStorage.getItem(themeKey);
+      if (stored === "dark" || stored === "light") {
+        applyTheme(stored);
+        return;
+      }
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(prefersDark ? "dark" : "light");
+    }
+
+    themeToggle.addEventListener("click", () => {
+      const isDark = document.documentElement.hasAttribute("data-theme");
+      const next = isDark ? "light" : "dark";
+      applyTheme(next);
+      localStorage.setItem(themeKey, next);
+    });
+
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+      if (!localStorage.getItem(themeKey)) applyTheme(e.matches ? "dark" : "light");
+    });
+
+    initTheme();
     renderPromptHistory();
     renderReferenceImages();
     loadConfig();
