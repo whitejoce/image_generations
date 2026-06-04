@@ -7,12 +7,12 @@ from openai import OpenAI
 # 从 .env 文件中加载环境变量
 load_dotenv()
 client = OpenAI(
-    api_key=os.getenv("api-key") if os.getenv("api-key") else "替换为你的API_KEY",
-    base_url=os.getenv("base-url"),
+    api_key=os.getenv("OPENAI_API_KEY") or "替换为你的API_KEY",
+    base_url=os.getenv("OPENAI_BASE_URL") or None,
 )
 
 stream = client.responses.create(
-    model="gpt-5.5",
+    model=os.getenv("TEXT_MODEL") or "gpt-5.5",
     input="Draw a gorgeous image of a river made of white owl feathers, snaking its way through a serene winter landscape",
     stream=True,
     tools=[{"type": "image_generation", "partial_images": 3}],

@@ -113,6 +113,19 @@
       letter-spacing: 0;
     }
 
+    .version-badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 6px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--muted);
+      background: var(--surface-2);
+      font-size: 11px;
+      font-weight: 650;
+      vertical-align: middle;
+    }
+
     .subtitle {
       margin: 0 0 20px;
       color: var(--muted);
@@ -764,7 +777,7 @@
     <aside class="controls">
       <div class="controls-header">
         <div>
-          <h1>partial_image debugger</h1>
+          <h1>partial_image debugger <span id="versionBadge" class="version-badge">v0.2.0</span></h1>
           <p class="subtitle">Image API generation stream visualizer</p>
         </div>
         <button class="theme-toggle" id="themeToggle" type="button" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">☀</button>
@@ -777,7 +790,7 @@
           <option value="">Prompt history</option>
         </select>
         <button id="applyPromptHistory" type="button">Use</button>
-        <button id="clearPromptHistory" type="button">Clear</button>
+        <!-- <button id="clearPromptHistory" type="button">Clear</button> -->
       </div>
       <div class="field-hint">Generated prompts are saved locally in this browser.</div>
 
@@ -799,11 +812,25 @@
         <div class="field-hint">Up to 16 images, 50MB each. Uploaded images automatically use /images/edits.</div>
       </section>
 
-      <label for="model">Image model</label>
-      <input id="model" value="gpt-image-2">
-      <div class="field-hint">Generation uses the Image API. Prompt optimization still uses Text Responses API.</div>
 
       <div class="grid">
+        <div>
+          <label for="apiMode">API mode</label>
+          <select id="apiMode">
+            <option value="images">Images API</option>
+            <option value="responses">Responses API</option>
+          </select>
+          <div id="apiModeHint" class="field-hint">Generation can use Images or Responses API. Edit mode always uses
+            Images API.</div>
+        </div>
+
+        <div>
+          <label for="model">Image model</label>
+          <input id="model" value="gpt-image-2">
+          <div class="field-hint">Images API model. Responses mode uses .env RESPONSE_* settings.</div>
+      
+        </div>
+      
         <div>
           <label for="size">Size</label>
           <select id="size">
@@ -950,6 +977,8 @@
   <script>
     const promptEl = document.getElementById("prompt");
     const modelEl = document.getElementById("model");
+    const apiModeEl = document.getElementById("apiMode");
+    const apiModeHint = document.getElementById("apiModeHint");
     const sizeEl = document.getElementById("size");
     const qualityEl = document.getElementById("quality");
     const partialsEl = document.getElementById("partials");
@@ -966,7 +995,7 @@
     const applyOptimizedBtn = document.getElementById("applyOptimized");
     const promptHistoryEl = document.getElementById("promptHistory");
     const applyPromptHistoryBtn = document.getElementById("applyPromptHistory");
-    const clearPromptHistoryBtn = document.getElementById("clearPromptHistory");
+    // const clearPromptHistoryBtn = document.getElementById("clearPromptHistory");
     const uploadReferencesBtn = document.getElementById("uploadReferences");
     const clearReferencesBtn = document.getElementById("clearReferences");
     const referenceInput = document.getElementById("referenceInput");
@@ -990,6 +1019,7 @@
     const zoomCloseBtn = document.getElementById("zoomClose");
     const zoomStage = document.getElementById("zoomStage");
     const zoomImage = document.getElementById("zoomImage");
+    const versionBadge = document.getElementById("versionBadge");
 
     let currentDataUrl = "";
     let currentFormat = "png";
@@ -997,6 +1027,8 @@
     let timelineImages = [];
     let activeTimelineId = "";
     let referenceImages = [];
+    let promptHistory = [];
+    let appConfig = {};
 
     const promptHistoryKey = "partialImagePromptHistory.v1";
     const themeKey = "partialImageTheme.v1";
@@ -1010,6 +1042,7 @@
       optimizeBtn.disabled = isBusy;
       uploadReferencesBtn.disabled = isBusy;
       clearReferencesBtn.disabled = isBusy || referenceImages.length === 0;
+      updateApiModeState();
     }
 
     function addLog(message, className) {
@@ -1057,7 +1090,9 @@
         const response = await fetch("/api/config");
         const config = await response.json();
         if (!response.ok) throw new Error(config.detail || response.statusText);
-        modelEl.value = config.image_model || modelEl.value;
+        appConfig = config;
+        syncModelForApiMode();
+        if (config.version) versionBadge.textContent = `v${config.version}`;
       } catch (error) {
         addLog(`config load failed: ${error.message}`, "danger");
       }
@@ -1100,10 +1135,31 @@
 
     function updateImageCountState() {
       const hasPartials = Number(partialsEl.value) > 0;
-      if (hasPartials) {
+      const usesResponses = apiModeEl.value === "responses" && referenceImages.length === 0;
+      if (hasPartials || usesResponses) {
         imageCountEl.value = "1";
       }
-      imageCountEl.disabled = hasPartials;
+      imageCountEl.disabled = hasPartials || usesResponses;
+    }
+
+    function syncModelForApiMode() {
+      if (referenceImages.length > 0 || apiModeEl.value === "images") {
+        modelEl.value = appConfig.image_model || modelEl.value;
+      } else {
+        modelEl.value = appConfig.response_image_model || modelEl.value;
+      }
+    }
+
+    function updateApiModeState() {
+      const hasReferences = referenceImages.length > 0;
+      apiModeEl.disabled = hasReferences || generateBtn.disabled;
+      if (apiModeHint) {
+        apiModeHint.textContent = hasReferences
+          ? "Reference edit mode always uses Images API."
+          : "Text generation can use Images or Responses API. Edit mode always uses Images API.";
+      }
+      syncModelForApiMode();
+      updateImageCountState();
     }
 
     function referenceTypeAllowed(file) {
@@ -1151,6 +1207,7 @@
       referenceMode.textContent = referenceImages.length
         ? `${referenceImages.length} image${referenceImages.length === 1 ? "" : "s"}: edit mode.`
         : "No images: generation mode.";
+      updateApiModeState();
 
       if (!referenceImages.length) {
         const emptyState = document.createElement("div");
@@ -1179,7 +1236,7 @@
       }
     }
 
-    function readPromptHistory() {
+    function readLocalPromptHistory() {
       try {
         const parsed = JSON.parse(localStorage.getItem(promptHistoryKey) || "[]");
         return Array.isArray(parsed) ? parsed : [];
@@ -1188,38 +1245,124 @@
       }
     }
 
-    function writePromptHistory(history) {
+    function writeLocalPromptHistory(history) {
       localStorage.setItem(promptHistoryKey, JSON.stringify(history.slice(0, 30)));
     }
 
     function renderPromptHistory() {
-      const history = readPromptHistory();
       promptHistoryEl.innerHTML = '<option value="">Prompt history</option>';
-      for (const item of history) {
+      for (const item of promptHistory) {
         const option = document.createElement("option");
-        option.value = item.prompt;
-        const when = item.createdAt ? new Date(item.createdAt).toLocaleString() : "";
+        option.value = item.id;
+        const when = item.created_at ? new Date(item.created_at).toLocaleString() : "";
         const shortPrompt = item.prompt.length > 72 ? `${item.prompt.slice(0, 72)}...` : item.prompt;
-        option.textContent = when ? `${when} - ${shortPrompt}` : shortPrompt;
+        const imageCount = item.input_images?.length || 0;
+        const suffix = imageCount ? ` (${imageCount} refs)` : "";
+        option.textContent = when ? `${when} - ${shortPrompt}${suffix}` : `${shortPrompt}${suffix}`;
         promptHistoryEl.appendChild(option);
       }
-      applyPromptHistoryBtn.disabled = history.length === 0;
-      clearPromptHistoryBtn.disabled = history.length === 0;
+      applyPromptHistoryBtn.disabled = promptHistory.length === 0;
+      // clearPromptHistoryBtn.disabled = promptHistory.length === 0;
+    }
+
+    function normalizeLocalPromptHistory() {
+      return readLocalPromptHistory()
+        .filter((item) => item && typeof item.prompt === "string" && item.prompt.trim())
+        .map((item, index) => ({
+          id: `local-${index}-${item.createdAt || ""}`,
+          created_at: item.createdAt || "",
+          prompt: item.prompt,
+          input_images: [],
+        }));
+    }
+
+    function mergePromptHistory(serverHistory, localHistory) {
+      const merged = [];
+      const seen = new Set();
+      for (const item of [...serverHistory, ...localHistory]) {
+        if (!item || typeof item.prompt !== "string" || !item.prompt.trim()) continue;
+        const key = `${item.created_at || ""}\n${item.prompt}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        merged.push({
+          ...item,
+          id: String(item.id || `history-${merged.length}`),
+          input_images: Array.isArray(item.input_images) ? item.input_images : [],
+        });
+      }
+      return merged.slice(0, 30);
+    }
+
+    async function loadPromptHistory() {
+      try {
+        const response = await fetch("/api/prompt-history");
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || response.statusText);
+        const serverHistory = Array.isArray(data.history) ? data.history : [];
+        promptHistory = mergePromptHistory(serverHistory, normalizeLocalPromptHistory());
+      } catch (error) {
+        promptHistory = normalizeLocalPromptHistory();
+        addLog(`prompt history load failed: ${error.message}`, "danger");
+      }
+      renderPromptHistory();
     }
 
     function savePromptHistory(prompt) {
       const value = prompt.trim();
       if (!value) return;
-      const existing = readPromptHistory().filter((item) => item.prompt !== value);
+      const existing = readLocalPromptHistory().filter((item) => item.prompt !== value);
       existing.unshift({ prompt: value, createdAt: new Date().toISOString() });
-      writePromptHistory(existing);
+      writeLocalPromptHistory(existing);
+      promptHistory = mergePromptHistory(promptHistory, normalizeLocalPromptHistory());
       renderPromptHistory();
+    }
+
+    async function fileFromHistoryImage(image) {
+      const response = await fetch(image.url);
+      if (!response.ok) {
+        throw new Error(`Could not load ${image.original_filename || image.filename}.`);
+      }
+      const blob = await response.blob();
+      return new File(
+        [blob],
+        image.original_filename || image.filename,
+        {type: image.content_type || blob.type || "application/octet-stream"}
+      );
+    }
+
+    async function applyPromptHistoryItem(item) {
+      promptEl.value = item.prompt;
+      clearReferenceImages();
+      const inputImages = item.input_images || [];
+      if (!inputImages.length) {
+        addLog("prompt history applied");
+        return;
+      }
+
+      const loaded = [];
+      try {
+        for (const image of inputImages) {
+          const file = await fileFromHistoryImage(image);
+          loaded.push({
+            id: `history-${item.id}-${loaded.length}-${Math.random().toString(16).slice(2)}`,
+            file,
+            url: URL.createObjectURL(file),
+          });
+        }
+      } catch (error) {
+        for (const image of loaded) URL.revokeObjectURL(image.url);
+        throw error;
+      }
+      referenceImages = loaded;
+      renderReferenceImages();
+      addLog(`prompt history applied with ${loaded.length} reference image${loaded.length === 1 ? "" : "s"}`);
     }
 
     function requestPayload() {
       return {
         prompt: promptEl.value.trim(),
         model: modelEl.value.trim() || null,
+        api_mode: referenceImages.length ? "images" : apiModeEl.value,
         size: sizeEl.value,
         quality: qualityEl.value,
         partial_images: Number(partialsEl.value),
@@ -1379,7 +1522,7 @@
       resetView();
       savePromptHistory(payload.prompt);
       const mode = referenceImages.length ? "edit" : "generate";
-      addLog(`${mode} requested reference_images=${referenceImages.length}`);
+      addLog(`${mode} requested api_mode=${payload.api_mode} reference_images=${referenceImages.length}`);
       streamEndpoint("/api/generate", requestBody(payload));
     });
 
@@ -1424,17 +1567,25 @@
       addLog("optimized prompt applied");
     });
 
-    applyPromptHistoryBtn.addEventListener("click", () => {
-      if (!promptHistoryEl.value) return;
-      promptEl.value = promptHistoryEl.value;
-      addLog("prompt history applied");
+    applyPromptHistoryBtn.addEventListener("click", async () => {
+      const item = promptHistory.find((entry) => entry.id === promptHistoryEl.value);
+      if (!item) return;
+      setBusy(true);
+      try {
+        await applyPromptHistoryItem(item);
+      } catch (error) {
+        addLog(error.message, "danger");
+      } finally {
+        setBusy(false);
+      }
     });
 
-    clearPromptHistoryBtn.addEventListener("click", () => {
-      localStorage.removeItem(promptHistoryKey);
-      renderPromptHistory();
-      addLog("prompt history cleared");
-    });
+    // clearPromptHistoryBtn.addEventListener("click", () => {
+    //   localStorage.removeItem(promptHistoryKey);
+    //   promptHistory = [];
+    //   renderPromptHistory();
+    //   addLog("prompt history cleared");
+    // });
 
     uploadReferencesBtn.addEventListener("click", () => {
       referenceInput.click();
@@ -1467,8 +1618,9 @@
 
     formatEl.addEventListener("change", updateCompressionState);
     partialsEl.addEventListener("change", updateImageCountState);
+    apiModeEl.addEventListener("change", updateApiModeState);
     updateCompressionState();
-    updateImageCountState();
+    updateApiModeState();
 
     function applyTheme(theme) {
       if (theme === "dark") {
@@ -1502,9 +1654,9 @@
     });
 
     initTheme();
-    renderPromptHistory();
     renderReferenceImages();
     loadConfig();
+    loadPromptHistory();
   </script>
 </body>
 </html>
