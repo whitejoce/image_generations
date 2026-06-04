@@ -46,20 +46,23 @@ pip install openai python-dotenv fastapi uvicorn python-multipart
 ## 配置环境变量
 
 在 `partial_image/.env` 中配置 API Key：
-
+> 参考 `partial_image/.env_sample` 文件进行配置。
 ```env
 OPENAI_BASE_URL= https://openai.com/v1  # 必填
 OPENAI_API_KEY= sk-xxxxxxx  # 可选，自定义 API Base URL 时使用
 IMAGE_MODEL=gpt-image-2
-TEXT_MODEL=gpt-5.5
+
+# 可选：提示词优化专用配置。
+OPTIMIZE_BASE_URL=
+OPTIMIZE_API_KEY=
+OPTIMIZE_TEXT_MODEL=gpt-5.5
+
+# 可选：Responses API 生图专用配置。
+RESPONSE_BASE_URL=
+RESPONSE_API_KEY=
+RESPONSE_MODEL=gpt-5.5
+RESPONSE_IMAGE_MODEL=gpt-image-2
 ```
-
-说明：
-
-- `OPENAI_API_KEY`：必填，OpenAI API Key
-- `OPENAI_BASE_URL`：可选，自定义 API Base URL 时使用
-- `IMAGE_MODEL`：页面可修改，默认 `gpt-image-2`
-- `TEXT_MODEL`：默认 `gpt-5.5`，用于提示词优化
 
 ## 启动 Web 工具
 
@@ -81,9 +84,12 @@ http://127.0.0.1:8000
 ### 生成图片
 
 1. 在页面中输入图片提示词。
-2. 选择尺寸、质量、输出格式等参数。
-3. 设置 `partial_images` 为 `1`、`2` 或 `3`，即可在生成过程中看到中间图。
-4. 点击生成后，页面会逐步展示 partial images 和最终图片。
+2. 为无参考图文生图选择 Images API 或 Responses API。
+3. 选择尺寸、质量、输出格式等参数。
+4. 设置 `partial_images` 为 `1`、`2` 或 `3`，即可在生成过程中看到中间图。
+5. 点击生成后，页面会逐步展示 partial images 和最终图片。
+
+Responses API 模式仅用于未上传参考图的文生图。上传参考图后的编辑模式固定使用 Images API。
 
 生成结果会保存到：
 
@@ -134,6 +140,7 @@ python partial_image.py
 ```json
 {
   "prompt": "一条由白色猫头鹰羽毛组成的河流，穿过安静的冬季森林",
+  "api_mode": "images",
   "size": "1024x1024",
   "quality": "auto",
   "partial_images": 2,

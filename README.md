@@ -39,7 +39,7 @@ partial_image/
 ## Requirements
 
 - Python 3.10 or later
-- A valid OpenAI API key
+- API key(s) for the features you use
 
 Install dependencies:
 
@@ -55,21 +55,24 @@ pip install openai python-dotenv fastapi uvicorn python-multipart
 
 ## Environment Variables
 
-Configure your API key in `partial_image/.env`:
-
+Configure API credentials in `partial_image/.env`:
+> use the `partial_image/.env_sample` file as a template.
 ```env
 OPENAI_BASE_URL= https://openai.com/v1
-OPENAI_API_KEY= YOUR_API_KEY
+OPENAI_API_KEY= YOUR_IMAGE_API_KEY
 IMAGE_MODEL=gpt-image-2
-TEXT_MODEL=gpt-5.5
+
+# Optional prompt optimization overrides.
+OPTIMIZE_BASE_URL= your_optimize_api_base_url
+OPTIMIZE_API_KEY= YOUR_OPTIMIZE_API_KEY
+OPTIMIZE_TEXT_MODEL=gpt-5.5
+
+# Optional Responses API generation overrides.
+RESPONSE_BASE_URL= your_responses_api_base_url
+RESPONSE_API_KEY= YOUR_RESPONSE_API_KEY
+RESPONSE_MODEL=gpt-5.5
+RESPONSE_IMAGE_MODEL=gpt-image-2
 ```
-
-Notes:
-
-- `OPENAI_API_KEY`: required OpenAI API key
-- `OPENAI_BASE_URL`: optional custom API base URL
-- `IMAGE_MODEL`: editable in the web page, defaults to `gpt-image-2`
-- `TEXT_MODEL`: defaults to `gpt-5.5`, used for prompt optimization
 
 ## Run The Web App
 
@@ -91,9 +94,12 @@ http://127.0.0.1:8000
 ### Generate Images
 
 1. Enter an image prompt in the web page.
-2. Choose size, quality, output format, and other parameters.
-3. Set `partial_images` to `1`, `2`, or `3` to preview intermediate images while generation is running.
-4. Start generation. The page will show partial images first, then the final image.
+2. Choose Images API or Responses API for text-to-image generation.
+3. Choose size, quality, output format, and other parameters.
+4. Set `partial_images` to `1`, `2`, or `3` to preview intermediate images while generation is running.
+5. Start generation. The page will show partial images first, then the final image.
+
+Responses API mode only applies when no reference images are uploaded. Reference-image edit mode always uses the Images API.
 
 Generated results are saved to:
 
@@ -144,6 +150,7 @@ Example JSON request:
 ```json
 {
   "prompt": "A river made of white owl feathers winding through a quiet winter forest",
+  "api_mode": "images",
   "size": "1024x1024",
   "quality": "auto",
   "partial_images": 2,
