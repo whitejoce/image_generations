@@ -341,7 +341,8 @@
 
     .preview {
       min-width: 0;
-      max-height: 62vh;
+      height: 100%;
+      min-height: 0;
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -360,6 +361,26 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .preview-title {
+      min-width: 0;
+    }
+
+    .preview-tools {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .preview-zoom {
+      min-height: 34px;
+      padding: 6px 10px;
+      font-size: 13px;
     }
 
     .status {
@@ -390,9 +411,12 @@
     }
 
     .image-stage {
+      position: relative;
       min-height: 0;
-      display: grid;
-      place-items: center;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 18px;
       overflow: hidden;
       background:
@@ -408,7 +432,9 @@
     .image-stage img {
       display: block;
       max-width: 100%;
-      max-height: min(52vh, 560px);
+      max-height: 100%;
+      width: auto;
+      height: auto;
       object-fit: contain;
       border-radius: 4px;
       box-shadow: 0 16px 40px rgba(17, 24, 39, 0.22);
@@ -431,7 +457,7 @@
     .loading-overlay {
       position: absolute;
       z-index: 6;
-      inset: 56px 0 0 0;
+      inset: 0;
       display: none;
       align-items: center;
       justify-content: center;
@@ -454,6 +480,114 @@
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    .image-dialog {
+      width: min(94vw, 1280px);
+      height: min(92vh, 900px);
+      max-width: none;
+      max-height: none;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.32);
+      overflow: hidden;
+    }
+
+    .image-dialog::backdrop {
+      background: rgba(15, 23, 42, 0.64);
+    }
+
+    .dialog-shell {
+      height: 100%;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .dialog-toolbar {
+      min-height: 56px;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .dialog-title {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .dialog-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .zoom-mode,
+    .dialog-close {
+      min-height: 34px;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .zoom-mode[aria-pressed="true"] {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .zoom-stage {
+      position: relative;
+      min-height: 0;
+      min-width: 0;
+      overflow: auto;
+      padding: 18px;
+      background:
+        linear-gradient(45deg, var(--checker) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--checker) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--checker) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--checker) 75%),
+        var(--checker-base);
+      background-size: 26px 26px, 26px 26px, 26px 26px, 26px 26px, auto;
+      background-position: 0 0, 0 13px, 13px -13px, -13px 0, 0 0;
+    }
+
+    .zoom-stage.fit {
+      overflow: hidden;
+    }
+
+    .zoom-stage.actual {
+      display: block;
+    }
+
+    .zoom-stage img {
+      display: block;
+      border-radius: 4px;
+      box-shadow: 0 16px 40px rgba(17, 24, 39, 0.24);
+    }
+
+    .zoom-stage.fit img {
+      position: absolute;
+      inset: 18px;
+      width: calc(100% - 36px);
+      height: calc(100% - 36px);
+      object-fit: contain;
+    }
+
+    .zoom-stage.actual img {
+      max-width: none;
+      max-height: none;
+      width: auto;
+      height: auto;
+      margin: 0 auto;
     }
 
     .lower {
@@ -596,14 +730,6 @@
         grid-template-rows: minmax(260px, 54vh) auto;
       }
 
-      .preview {
-        max-height: 58vh;
-      }
-
-      .image-stage img {
-        max-height: min(46vh, 460px);
-      }
-
       .lower {
         grid-template-columns: 1fr;
       }
@@ -618,6 +744,17 @@
       .workspace,
       .controls {
         padding: 14px;
+      }
+
+      .preview-header,
+      .dialog-toolbar {
+        align-items: flex-start;
+      }
+
+      .preview-tools,
+      .dialog-actions {
+        width: 100%;
+        justify-content: flex-start;
       }
     }
   </style>
@@ -764,11 +901,14 @@
     <section class="workspace">
       <section class="preview">
         <div class="preview-header">
-          <div>
+          <div class="preview-title">
             <strong>Current preview</strong>
             <div id="status" class="status"><span class="status-dot" id="statusDot"></span> <span id="statusText">Idle</span></div>
           </div>
-          <div id="elapsed" class="status">0 ms</div>
+          <div class="preview-tools">
+            <div id="elapsed" class="status">0 ms</div>
+            <button id="zoomPreview" class="preview-zoom" type="button" disabled>Zoom</button>
+          </div>
         </div>
         <div class="image-stage">
            <div id="empty" class="empty">Run generation or replay local images to inspect the stream.</div>
@@ -790,6 +930,22 @@
       </section>
     </section>
   </main>
+
+  <dialog id="imageDialog" class="image-dialog" aria-label="Image preview">
+    <div class="dialog-shell">
+      <div class="dialog-toolbar">
+        <div class="dialog-title">Image preview</div>
+        <div class="dialog-actions">
+          <button id="zoomFit" class="zoom-mode" type="button" aria-pressed="true">Fit</button>
+          <button id="zoomActual" class="zoom-mode" type="button" aria-pressed="false">1:1</button>
+          <button id="zoomClose" class="dialog-close" type="button">Close</button>
+        </div>
+      </div>
+      <div id="zoomStage" class="zoom-stage fit">
+        <img id="zoomImage" alt="Generated image enlarged preview">
+      </div>
+    </div>
+  </dialog>
 
   <script>
     const promptEl = document.getElementById("prompt");
@@ -827,6 +983,13 @@
     const elapsedEl = document.getElementById("elapsed");
     const loadingOverlay = document.getElementById("loadingOverlay");
     const themeToggle = document.getElementById("themeToggle");
+    const zoomPreviewBtn = document.getElementById("zoomPreview");
+    const imageDialog = document.getElementById("imageDialog");
+    const zoomFitBtn = document.getElementById("zoomFit");
+    const zoomActualBtn = document.getElementById("zoomActual");
+    const zoomCloseBtn = document.getElementById("zoomClose");
+    const zoomStage = document.getElementById("zoomStage");
+    const zoomImage = document.getElementById("zoomImage");
 
     let currentDataUrl = "";
     let currentFormat = "png";
@@ -864,6 +1027,31 @@
       statusText.textContent = text;
     }
 
+    function setZoomMode(mode) {
+      const isActual = mode === "actual";
+      zoomStage.classList.toggle("fit", !isActual);
+      zoomStage.classList.toggle("actual", isActual);
+      zoomFitBtn.setAttribute("aria-pressed", String(!isActual));
+      zoomActualBtn.setAttribute("aria-pressed", String(isActual));
+    }
+
+    function syncZoomImage() {
+      if (currentDataUrl) {
+        zoomImage.src = currentDataUrl;
+        zoomPreviewBtn.disabled = false;
+      } else {
+        zoomImage.removeAttribute("src");
+        zoomPreviewBtn.disabled = true;
+      }
+    }
+
+    function openZoomDialog() {
+      if (!currentDataUrl) return;
+      setZoomMode("fit");
+      syncZoomImage();
+      if (!imageDialog.open) imageDialog.showModal();
+    }
+
     async function loadConfig() {
       try {
         const response = await fetch("/api/config");
@@ -882,6 +1070,8 @@
       activeTimelineId = "";
       currentImage.hidden = true;
       currentImage.removeAttribute("src");
+      if (imageDialog.open) imageDialog.close();
+      syncZoomImage();
       empty.hidden = false;
       timeline.innerHTML = "";
       log.innerHTML = "";
@@ -1061,6 +1251,7 @@
       currentDataUrl = image.dataUrl || `data:image/${mime};base64,${image.b64}`;
       currentImage.src = currentDataUrl;
       currentImage.hidden = false;
+      syncZoomImage();
       empty.hidden = true;
       loadingOverlay.classList.remove("visible");
       downloadBtn.disabled = false;
@@ -1264,6 +1455,14 @@
       link.href = currentDataUrl;
       link.download = `partial-image-current.${currentFormat}`;
       link.click();
+    });
+
+    zoomPreviewBtn.addEventListener("click", openZoomDialog);
+    zoomFitBtn.addEventListener("click", () => setZoomMode("fit"));
+    zoomActualBtn.addEventListener("click", () => setZoomMode("actual"));
+    zoomCloseBtn.addEventListener("click", () => imageDialog.close());
+    imageDialog.addEventListener("click", (event) => {
+      if (event.target === imageDialog) imageDialog.close();
     });
 
     formatEl.addEventListener("change", updateCompressionState);
